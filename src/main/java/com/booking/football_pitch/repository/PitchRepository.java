@@ -6,7 +6,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @Repository
@@ -17,13 +18,15 @@ public interface PitchRepository extends JpaRepository<Pitch, Long> {
            "AND p.status = 'ACTIVE' " +
            "AND p.id NOT IN (" +
            "    SELECT b.pitch.id FROM Booking b " +
-           "    WHERE b.status IN ('PENDING', 'CONFIRMED') " +
+           "    WHERE b.bookingDate = :bookingDate " +
+           "    AND b.status IN ('PENDING', 'CONFIRMED') " +
            "    AND b.startTime < :endTime " +
            "    AND b.endTime > :startTime" +
            ")")
     List<Pitch> findAvailablePitches(
             @Param("venueId") Long venueId,
-            @Param("startTime") LocalDateTime startTime,
-            @Param("endTime") LocalDateTime endTime
+            @Param("bookingDate") LocalDate bookingDate,
+            @Param("startTime") LocalTime startTime,
+            @Param("endTime") LocalTime endTime
     );
 }

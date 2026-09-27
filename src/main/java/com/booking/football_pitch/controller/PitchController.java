@@ -16,7 +16,7 @@ public class PitchController {
 
 	private final PitchService pitchService;
 
-	@GetMapping("/venue/{venueId}")
+	@PostMapping("/search")
 	public ResponseEntity<List<PitchResponse>> searchAvailablePitches(@RequestBody SearchPitchRequest request) {
         List<PitchResponse> pitches = pitchService.findAvailablePitches(request);
         return ResponseEntity.ok(pitches);

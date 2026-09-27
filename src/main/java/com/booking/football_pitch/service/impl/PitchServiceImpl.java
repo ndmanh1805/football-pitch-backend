@@ -20,10 +20,11 @@ public class PitchServiceImpl implements PitchService {
 	public List<PitchResponse> findAvailablePitches(SearchPitchRequest request) {
         // Gọi câu lệnh SQL tối ưu từ Repository
         List<Pitch> availablePitches = pitchRepository.findAvailablePitches(
-                request.getVenueId(),
-                request.getStartTime(),
-                request.getEndTime()
-        );
+			request.getVenueId(),
+			request.getBookingDate(),
+			request.getStartTime(),
+			request.getEndTime()
+	);
         // Biến đổi Entity sang DTO để giấu bớt thông tin thừa (Đã bỏ pricePerHour)
         return availablePitches.stream().map(pitch -> PitchResponse.builder()
                 .id(pitch.getId())
