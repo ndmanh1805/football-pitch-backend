@@ -1,14 +1,29 @@
 package com.booking.football_pitch.repository;
 
-import java.util.List;
-
+import com.booking.football_pitch.entity.Pitch;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.booking.football_pitch.entity.Pitch;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 public interface PitchRepository extends JpaRepository<Pitch, Long> {
 
-	List<Pitch> findByVenueIdAndStatus(Long venueId, Pitch.Status status);
+	// Câu lệnh SQL "Triệu đô" xử lý tìm sân trống cực kỳ tối ưu
+    @Query("SELECT p FROM Pitch p WHERE p.venue.id = :venueId " +
+           "AND p.status = 'ACTIVE' " +
+           "AND p.id NOT IN (" +
+           "    SELECT b.pitch.id FROM Booking b " +
+           "    WHERE b.status IN ('PENDING', 'CONFIRMED') " +
+           "    AND b.startTime < :endTime " +
+           "    AND b.endTime > :startTime" +
+           ")")
+    List<Pitch> findAvailablePitches(
+            @Param("venueId") Long venueId,
+            @Param("startTime") LocalDateTime startTime,
+            @Param("endTime") LocalDateTime endTime
+    );
 }

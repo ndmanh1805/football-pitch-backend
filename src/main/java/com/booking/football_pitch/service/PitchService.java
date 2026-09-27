@@ -1,10 +1,10 @@
 package com.booking.football_pitch.service;
 
+import com.booking.football_pitch.dto.request.SearchPitchRequest;
+import com.booking.football_pitch.dto.response.PitchResponse;
 import java.util.List;
-
-import com.booking.football_pitch.entity.Pitch;
 
 public interface PitchService {
 
-	List<Pitch> getActivePitchesByVenue(Long venueId);
+	List<PitchResponse> findAvailablePitches(SearchPitchRequest request);
 }
