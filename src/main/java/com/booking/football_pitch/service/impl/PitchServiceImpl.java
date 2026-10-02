@@ -25,12 +25,13 @@ public class PitchServiceImpl implements PitchService {
 			request.getStartTime(),
 			request.getEndTime()
 	);
-        // Biến đổi Entity sang DTO để giấu bớt thông tin thừa (Đã bỏ pricePerHour)
+        // Biến đổi Entity sang DTO và lấy đúng giá tiền
         return availablePitches.stream().map(pitch -> PitchResponse.builder()
                 .id(pitch.getId())
                 .name(pitch.getName())
                 .pitchType(pitch.getPitchType().name())
+                .hourlyPrice(pitch.getHourlyPrice()) // Lấy đúng tên hàm getHourlyPrice()
                 .status(pitch.getStatus().name())
-                .build()).collect(Collectors.toList());
+                .build()).collect(java.util.stream.Collectors.toList());
 	}
 }
