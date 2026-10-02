@@ -9,6 +9,7 @@ import com.booking.football_pitch.entity.Booking;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
@@ -24,4 +25,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("startTime") LocalTime startTime,
             @Param("endTime") LocalTime endTime
     );
+    // TÍNH NĂNG MỚI: Tìm toàn bộ lịch sử đặt sân của 1 người dùng, xếp theo thời gian mới nhất
+    List<Booking> findByUserIdOrderByCreatedAtDesc(Long userId);
 }

@@ -16,7 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Duration;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -92,5 +94,23 @@ public class BookingServiceImpl implements BookingService {
                 .totalPrice(savedBooking.getTotalAmount()) 
                 .status(savedBooking.getStatus().name())
                 .build();
+    }
+    // ================= TÍNH NĂNG MỚI NẰM Ở ĐÂY =================
+    @Override
+    public List<BookingResponse> getBookingHistory(Long userId) {
+        // 1. Nhờ Repository tìm toàn bộ hóa đơn của User này trong Database
+        List<Booking> bookings = bookingRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        
+        // 2. Biến đổi (Map) danh sách Entity thô thành danh sách DTO sạch sẽ để trả về
+        return bookings.stream().map(booking -> BookingResponse.builder()
+                .id(booking.getId())
+                .customerName(booking.getUser().getFullName())
+                .pitchName(booking.getPitch().getName())
+                .bookingDate(booking.getBookingDate())
+                .startTime(booking.getStartTime())
+                .endTime(booking.getEndTime())
+                .totalPrice(booking.getTotalAmount())
+                .status(booking.getStatus().name())
+                .build()).collect(Collectors.toList());
     }
 }
