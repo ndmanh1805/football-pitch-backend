@@ -30,4 +30,14 @@ public class BookingController {
         List<BookingResponse> history = bookingService.getBookingHistory(userId);
         return ResponseEntity.ok(history);
     }
+
+    // TÍNH NĂNG MỚI: API Hủy đặt sân
+    @PutMapping("/{bookingId}/cancel")
+    public ResponseEntity<BookingResponse> cancelBooking(
+            @PathVariable Long bookingId,
+            @RequestBody com.booking.football_pitch.dto.request.CancelBookingRequest request) {
+        
+        BookingResponse response = bookingService.cancelBooking(bookingId, request);
+        return ResponseEntity.ok(response);
+    }
 }

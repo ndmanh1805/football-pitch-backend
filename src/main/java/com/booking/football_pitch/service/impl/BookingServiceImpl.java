@@ -113,4 +113,45 @@ public class BookingServiceImpl implements BookingService {
                 .status(booking.getStatus().name())
                 .build()).collect(Collectors.toList());
     }
+    // ================= TÍNH NĂNG MỚI: HỦY ĐẶT SÂN =================
+    @Override
+    @Transactional
+    public BookingResponse cancelBooking(Long bookingId, com.booking.football_pitch.dto.request.CancelBookingRequest request) {
+        
+        // 1. Tìm đơn đặt sân trong DB
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn đặt sân này."));
+
+        // 2. Bảo mật: Chặn đứng hành vi hủy trộm sân của người khác
+        if (!booking.getUser().getId().equals(request.getUserId())) {
+            throw new RuntimeException("Lỗi bảo mật: Bạn không có quyền hủy đơn đặt sân của người khác!");
+        }
+
+        // 3. Ràng buộc nghiệp vụ: Không cho phép hủy nếu đơn đã hoàn thành hoặc đã hủy
+        if (booking.getStatus() == Booking.Status.CANCELLED) {
+            throw new RuntimeException("Đơn đặt sân này đã được hủy trước đó rồi.");
+        }
+        if (booking.getStatus() == Booking.Status.COMPLETED) {
+            throw new RuntimeException("Không thể hủy đơn đặt sân đã đá xong.");
+        }
+
+        // 4. Thực hiện Hủy: Đổi trạng thái, ghi nhận thời gian và lý do
+        booking.setStatus(Booking.Status.CANCELLED);
+        booking.setCancelledAt(java.time.LocalDateTime.now());
+        booking.setCancelReason(request.getReason());
+
+        Booking savedBooking = bookingRepository.save(booking);
+
+        // 5. Trả về kết quả mới cho Frontend
+        return BookingResponse.builder()
+                .id(savedBooking.getId())
+                .customerName(savedBooking.getUser().getFullName())
+                .pitchName(savedBooking.getPitch().getName())
+                .bookingDate(savedBooking.getBookingDate())
+                .startTime(savedBooking.getStartTime())
+                .endTime(savedBooking.getEndTime())
+                .totalPrice(savedBooking.getTotalAmount())
+                .status(savedBooking.getStatus().name())
+                .build();
+    }
 }
