@@ -1,50 +1,52 @@
 package com.booking.football_pitch.service.impl;
 
-import com.booking.football_pitch.dto.request.UserRegisterRequest;
-import com.booking.football_pitch.dto.response.UserResponse;
 import com.booking.football_pitch.entity.User;
 import com.booking.football_pitch.repository.UserRepository;
 import com.booking.football_pitch.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder; // <--- Import cỗ máy
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-	private final UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder; // <--- Nhúng cỗ máy vào đây
 
-	@Override
-	public UserResponse registerUser(UserRegisterRequest request) {
-        // Kiểm tra trùng số điện thoại
-        if (userRepository.findByPhone(request.getPhone()).isPresent()) {
-            throw new RuntimeException("Số điện thoại đã được sử dụng");
+    // ============ TÍNH NĂNG MỚI: ĐĂNG KÝ ============
+    @Override
+    public com.booking.football_pitch.dto.response.UserResponse registerUser(com.booking.football_pitch.dto.request.UserRegisterRequest request) {
+        
+        // 1. Kiểm tra xem Email hoặc Số điện thoại đã bị ai đăng ký chưa
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Email này đã được sử dụng!");
+        }
+        if (userRepository.existsByPhone(request.getPhone())) {
+            throw new RuntimeException("Số điện thoại này đã được sử dụng!");
         }
 
-        // Map từ Request sang Entity để lưu Database
+        // 2. BĂM MẬT KHẨU: Đưa password raw (vd: 123456) qua máy xay BCrypt
+        String hashedPass = passwordEncoder.encode(request.getPassword());
+
+        // 3. Khởi tạo User mới
         User user = new User();
         user.setFullName(request.getFullName());
         user.setEmail(request.getEmail());
         user.setPhone(request.getPhone());
-        user.setPasswordHash(request.getPasswordHash());
-        // FIX LỖI TẠI ĐÂY: Ép kiểu từ String (DTO) sang Enum (Entity) một cách an toàn
-        if (request.getStatus() != null) {
-            user.setStatus(User.Status.valueOf(request.getStatus().toUpperCase()));
-        } else {
-            user.setStatus(User.Status.ACTIVE); // Mặc định là ACTIVE nếu không truyền
-        }
+        user.setPasswordHash(hashedPass); // Lưu chuỗi loằng ngoằng vào DB, tuyệt đối không lưu raw
+        user.setStatus(User.Status.ACTIVE);
+
         User savedUser = userRepository.save(user);
-        // Map từ Entity sang Response để trả về cho Client
-        return UserResponse.builder()
+
+        // 4. Trả về thông tin (KHÔNG BAO GIỜ TRẢ VỀ PASSWORD)
+        return com.booking.football_pitch.dto.response.UserResponse.builder()
                 .id(savedUser.getId())
                 .fullName(savedUser.getFullName())
                 .email(savedUser.getEmail())
                 .phone(savedUser.getPhone())
-                // FIX LỖI TẠI ĐÂY: Chuyển từ Enum (Entity) về lại String để hiển thị ra JSON
-                .status(savedUser.getStatus().name())
-                .createdAt(savedUser.getCreatedAt())
                 .build();
-	}
+    }
     @Override
     public com.booking.football_pitch.dto.response.UserResponse getUserProfile(Long id) {
         User user = userRepository.findById(id)
