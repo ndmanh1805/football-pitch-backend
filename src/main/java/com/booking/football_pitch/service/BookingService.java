@@ -12,4 +12,7 @@ public interface BookingService {
 
     // Tính năng mới: Hủy đơn đặt sân
     BookingResponse cancelBooking(Long bookingId, com.booking.football_pitch.dto.request.CancelBookingRequest request);
+
+    // Tính năng mới: Lấy các khung giờ đã được đặt của 1 sân trong 1 ngày
+    java.util.List<com.booking.football_pitch.dto.response.BookedSlotResponse> getBookedSlots(Long pitchId, java.time.LocalDate date);
 }

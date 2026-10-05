@@ -27,4 +27,14 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     );
     // TÍNH NĂNG MỚI: Tìm toàn bộ lịch sử đặt sân của 1 người dùng, xếp theo thời gian mới nhất
     List<Booking> findByUserIdOrderByCreatedAtDesc(Long userId);
+
+    // Lấy danh sách các khung giờ đã bị đặt (không tính các đơn đã Hủy)
+    @Query("SELECT b FROM Booking b WHERE b.pitch.id = :pitchId " +
+           "AND b.bookingDate = :date " +
+           "AND b.status IN ('PENDING', 'CONFIRMED') " +
+           "ORDER BY b.startTime ASC")
+    List<Booking> findBookedSlotsByPitchAndDate(
+            @Param("pitchId") Long pitchId, 
+            @Param("date") LocalDate date
+    );
 }

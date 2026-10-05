@@ -154,4 +154,15 @@ public class BookingServiceImpl implements BookingService {
                 .status(savedBooking.getStatus().name())
                 .build();
     }
+    @Override
+    public java.util.List<com.booking.football_pitch.dto.response.BookedSlotResponse> getBookedSlots(Long pitchId, java.time.LocalDate date) {
+        // Lấy danh sách các hóa đơn đã đặt thành công
+        java.util.List<Booking> bookedList = bookingRepository.findBookedSlotsByPitchAndDate(pitchId, date);
+        
+        // Chỉ trích xuất đúng 2 thông tin là Giờ bắt đầu và Giờ kết thúc trả về cho Frontend
+        return bookedList.stream().map(b -> com.booking.football_pitch.dto.response.BookedSlotResponse.builder()
+                .startTime(b.getStartTime())
+                .endTime(b.getEndTime())
+                .build()).collect(java.util.stream.Collectors.toList());
+    }
 }

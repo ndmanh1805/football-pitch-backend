@@ -40,4 +40,13 @@ public class BookingController {
         BookingResponse response = bookingService.cancelBooking(bookingId, request);
         return ResponseEntity.ok(response);
     }
+    // TÍNH NĂNG MỚI: Tra cứu các khung giờ đã bị đặt
+    @GetMapping("/pitch/{pitchId}/booked-slots")
+    public ResponseEntity<List<com.booking.football_pitch.dto.response.BookedSlotResponse>> getBookedSlots(
+            @PathVariable Long pitchId,
+            @RequestParam @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate date) {
+        
+        List<com.booking.football_pitch.dto.response.BookedSlotResponse> response = bookingService.getBookedSlots(pitchId, date);
+        return ResponseEntity.ok(response);
+    }
 }
