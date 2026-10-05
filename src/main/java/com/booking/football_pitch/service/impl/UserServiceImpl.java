@@ -45,4 +45,42 @@ public class UserServiceImpl implements UserService {
                 .createdAt(savedUser.getCreatedAt())
                 .build();
 	}
+    @Override
+    public com.booking.football_pitch.dto.response.UserResponse getUserProfile(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy thông tin người dùng."));
+
+        // Trả về DTO an toàn (đã xóa dòng gọi getUsername)
+        return com.booking.football_pitch.dto.response.UserResponse.builder()
+                .id(user.getId())
+                .fullName(user.getFullName())
+                .phone(user.getPhone())
+                .email(user.getEmail())
+                .build();
+    }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional
+    public com.booking.football_pitch.dto.response.UserResponse updateUserProfile(Long id, com.booking.football_pitch.dto.request.UserUpdateRequest request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy thông tin người dùng."));
+
+        // Cập nhật thông tin nếu có truyền lên
+        if (request.getFullName() != null && !request.getFullName().isEmpty()) {
+            user.setFullName(request.getFullName());
+        }
+        if (request.getPhone() != null && !request.getPhone().isEmpty()) {
+            user.setPhone(request.getPhone());
+        }
+
+        User savedUser = userRepository.save(user);
+
+        // Đã xóa dòng gọi getUsername
+        return com.booking.football_pitch.dto.response.UserResponse.builder()
+                .id(savedUser.getId())
+                .fullName(savedUser.getFullName())
+                .phone(savedUser.getPhone())
+                .email(savedUser.getEmail())
+                .build();
+    }
 }

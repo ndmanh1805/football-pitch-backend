@@ -21,4 +21,19 @@ public class UserController {
         UserResponse createdUser = userService.registerUser(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }
+
+    // Xem thông tin cá nhân
+    @org.springframework.web.bind.annotation.GetMapping("/{id}")
+    public org.springframework.http.ResponseEntity<com.booking.football_pitch.dto.response.UserResponse> getUserProfile(
+            @org.springframework.web.bind.annotation.PathVariable Long id) {
+        return org.springframework.http.ResponseEntity.ok(userService.getUserProfile(id));
+    }
+
+    // Cập nhật thông tin cá nhân
+    @org.springframework.web.bind.annotation.PutMapping("/{id}")
+    public org.springframework.http.ResponseEntity<com.booking.football_pitch.dto.response.UserResponse> updateUserProfile(
+            @org.springframework.web.bind.annotation.PathVariable Long id,
+            @org.springframework.web.bind.annotation.RequestBody com.booking.football_pitch.dto.request.UserUpdateRequest request) {
+        return org.springframework.http.ResponseEntity.ok(userService.updateUserProfile(id, request));
+    }
 }
