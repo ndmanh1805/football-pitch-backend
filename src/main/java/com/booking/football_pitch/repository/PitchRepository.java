@@ -29,4 +29,7 @@ public interface PitchRepository extends JpaRepository<Pitch, Long> {
             @Param("startTime") LocalTime startTime,
             @Param("endTime") LocalTime endTime
     );
+
+    // Tìm danh sách sân theo ID của Cụm sân (Venue)
+    java.util.List<com.booking.football_pitch.entity.Pitch> findByVenueId(Long venueId);
 }

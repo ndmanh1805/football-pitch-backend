@@ -7,4 +7,6 @@ import java.util.List;
 public interface PitchService {
 
 	List<PitchResponse> findAvailablePitches(SearchPitchRequest request);
+
+	java.util.List<com.booking.football_pitch.dto.response.PitchResponse> getPitchesByVenue(Long venueId);
 }

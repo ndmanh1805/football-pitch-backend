@@ -34,4 +34,18 @@ public class PitchServiceImpl implements PitchService {
                 .status(pitch.getStatus().name())
                 .build()).collect(java.util.stream.Collectors.toList());
 	}
+
+        @Override
+    public java.util.List<com.booking.football_pitch.dto.response.PitchResponse> getPitchesByVenue(Long venueId) {
+        java.util.List<com.booking.football_pitch.entity.Pitch> pitches = pitchRepository.findByVenueId(venueId);
+        
+        return pitches.stream().map(pitch -> com.booking.football_pitch.dto.response.PitchResponse.builder()
+                .id(pitch.getId())
+                .name(pitch.getName())
+                .pitchType(pitch.getPitchType().name())
+                .surface(pitch.getSurface())
+                .hourlyPrice(pitch.getHourlyPrice())
+                .status(pitch.getStatus().name())
+                .build()).collect(java.util.stream.Collectors.toList());
+    }
 }
