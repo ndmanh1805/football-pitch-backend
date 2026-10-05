@@ -85,4 +85,26 @@ public class UserServiceImpl implements UserService {
                 .email(savedUser.getEmail())
                 .build();
     }
+
+    // ============ TÍNH NĂNG MỚI: ĐĂNG NHẬP ============
+    @Override
+    public com.booking.football_pitch.dto.response.UserResponse login(com.booking.football_pitch.dto.request.UserLoginRequest request) {
+        // 1. Tìm User dưới Database bằng Email
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Email không tồn tại!"));
+
+        // 2. Kiểm tra mật khẩu (Dùng phép thuật .matches() của BCrypt)
+        boolean isMatch = passwordEncoder.matches(request.getPassword(), user.getPasswordHash());
+        if (!isMatch) {
+            throw new RuntimeException("Mật khẩu không chính xác!");
+        }
+
+        // 3. Mật khẩu đúng -> Trả về thông tin User (tuyệt đối không trả về mật khẩu)
+        return com.booking.football_pitch.dto.response.UserResponse.builder()
+                .id(user.getId())
+                .fullName(user.getFullName())
+                .phone(user.getPhone())
+                .email(user.getEmail())
+                .build();
+    }
 }

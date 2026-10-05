@@ -12,4 +12,6 @@ public interface UserService {
 
     // Cập nhật thông tin cá nhân
     com.booking.football_pitch.dto.response.UserResponse updateUserProfile(Long id, com.booking.football_pitch.dto.request.UserUpdateRequest request);
+
+	com.booking.football_pitch.dto.response.UserResponse login(com.booking.football_pitch.dto.request.UserLoginRequest request);
 }

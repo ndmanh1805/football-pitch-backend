@@ -36,4 +36,11 @@ public class UserController {
             @org.springframework.web.bind.annotation.RequestBody com.booking.football_pitch.dto.request.UserUpdateRequest request) {
         return org.springframework.http.ResponseEntity.ok(userService.updateUserProfile(id, request));
     }
+
+    // Đăng nhập
+    @org.springframework.web.bind.annotation.PostMapping("/login")
+    public org.springframework.http.ResponseEntity<com.booking.football_pitch.dto.response.UserResponse> login(
+            @org.springframework.web.bind.annotation.RequestBody com.booking.football_pitch.dto.request.UserLoginRequest request) {
+        return org.springframework.http.ResponseEntity.ok(userService.login(request));
+    }
 }
