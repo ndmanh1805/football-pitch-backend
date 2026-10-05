@@ -13,7 +13,8 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder; // <--- Nhúng cỗ máy vào đây
-
+    private final com.booking.football_pitch.util.JwtUtils jwtUtils;
+    
     // ============ TÍNH NĂNG MỚI: ĐĂNG KÝ ============
     @Override
     public com.booking.football_pitch.dto.response.UserResponse registerUser(com.booking.football_pitch.dto.request.UserRegisterRequest request) {
@@ -38,15 +39,20 @@ public class UserServiceImpl implements UserService {
         user.setStatus(User.Status.ACTIVE);
 
         User savedUser = userRepository.save(user);
-
+        
+        // 3. Mật khẩu đúng -> TRẢ VỀ THÔNG TIN CỘNG THÊM TOKEN
+        String jwtToken = jwtUtils.generateToken(user.getEmail()); // In thẻ
+        
         // 4. Trả về thông tin (KHÔNG BAO GIỜ TRẢ VỀ PASSWORD)
         return com.booking.football_pitch.dto.response.UserResponse.builder()
                 .id(savedUser.getId())
                 .fullName(savedUser.getFullName())
                 .email(savedUser.getEmail())
                 .phone(savedUser.getPhone())
+                .token(jwtToken) // Giao thẻ cho khách
                 .build();
     }
+    
     @Override
     public com.booking.football_pitch.dto.response.UserResponse getUserProfile(Long id) {
         User user = userRepository.findById(id)
@@ -99,12 +105,16 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("Mật khẩu không chính xác!");
         }
 
+        // --- BỔ SUNG MỚI Ở ĐÂY: In thẻ Token khi Đăng nhập ---
+        String jwtToken = jwtUtils.generateToken(user.getEmail()); 
+
         // 3. Mật khẩu đúng -> Trả về thông tin User (tuyệt đối không trả về mật khẩu)
         return com.booking.football_pitch.dto.response.UserResponse.builder()
                 .id(user.getId())
                 .fullName(user.getFullName())
                 .phone(user.getPhone())
                 .email(user.getEmail())
+                .token(jwtToken) // --- BỔ SUNG MỚI Ở ĐÂY: Giao thẻ cho khách ---
                 .build();
     }
 }

@@ -12,4 +12,6 @@ public class UserResponse {
     private String phone;
     private String status;
     private LocalDateTime createdAt;
+    // Thêm dòng này vào danh sách các biến
+    private String token;
 }
