@@ -49,7 +49,10 @@ public class BookingServiceImpl implements BookingService {
         }
 
         // 3. Truy xuất dữ liệu
-        User user = userRepository.findById(request.getUserId())
+        // 1. TÍNH NĂNG MỚI: Tự động trích xuất thông tin khách hàng từ Thẻ từ (JWT Token)
+        com.booking.football_pitch.entity.User currentUser = (com.booking.football_pitch.entity.User) org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        
+        User user = userRepository.findById(currentUser.getId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy thông tin người dùng."));
                 
         Pitch pitch = pitchRepository.findById(request.getPitchId())
@@ -123,8 +126,12 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn đặt sân này."));
 
         // 2. Bảo mật: Chặn đứng hành vi hủy trộm sân của người khác
-        if (!booking.getUser().getId().equals(request.getUserId())) {
-            throw new RuntimeException("Lỗi bảo mật: Bạn không có quyền hủy đơn đặt sân của người khác!");
+        // Lấy thông tin người đang bấm nút Hủy từ Thẻ từ
+        com.booking.football_pitch.entity.User currentUser = (com.booking.football_pitch.entity.User) org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        // Kiểm tra xem đơn đặt sân này có phải của người đang đăng nhập không?
+        if (!booking.getUser().getId().equals(currentUser.getId())) {
+            throw new RuntimeException("Bạn không có quyền hủy đơn đặt sân của người khác!");
         }
 
         // 3. Ràng buộc nghiệp vụ: Không cho phép hủy nếu đơn đã hoàn thành hoặc đã hủy
