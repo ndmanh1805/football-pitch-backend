@@ -15,4 +15,9 @@ public interface BookingService {
 
     // Tính năng mới: Lấy các khung giờ đã được đặt của 1 sân trong 1 ngày
     java.util.List<com.booking.football_pitch.dto.response.BookedSlotResponse> getBookedSlots(Long pitchId, java.time.LocalDate date);
+
+    // Lấy toàn bộ danh sách đặt sân (Dành cho Admin)
+    List<BookingResponse> getAllBookings();
+    // Admin cập nhật trạng thái đơn hàng (Duyệt/Hủy)
+    BookingResponse updateBookingStatus(Long bookingId, String status);
 }

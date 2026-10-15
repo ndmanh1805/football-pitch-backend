@@ -9,13 +9,18 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor // <--- Cần có chữ này để gọi Chú bảo vệ
+@RequiredArgsConstructor 
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthFilter; // <--- Gọi chú bảo vệ đến
+    private final JwtAuthenticationFilter jwtAuthFilter; 
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -25,19 +30,39 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable()) // Tắt CSRF (vì dùng API)
-            .cors(cors -> cors.disable()) // Tạm tắt CORS (sau làm Frontend sẽ bật lại)
+            .csrf(csrf -> csrf.disable()) 
+            // 1. BẬT CORS VÀ TRỎ TỚI CẤU HÌNH PHÍA DƯỚI
+            .cors(cors -> cors.configurationSource(corsConfigurationSource())) 
             .authorizeHttpRequests(auth -> auth
-                // 1. Cửa xanh (Không cần thẻ): Ai cũng vào được
                 .requestMatchers("/api/v1/users/register", "/api/v1/users/login").permitAll()
                 .requestMatchers("/api/v1/venues/**", "/api/v1/pitches/**").permitAll()
-                
-                // 2. Cửa đỏ (Bắt buộc xét thẻ): Tất cả các đường link còn lại (như Đặt sân, Cập nhật Profile...)
                 .anyRequest().authenticated()
             )
-            // 3. Bố trí Chú bảo vệ đứng trước cánh cửa mặc định của Spring Boot
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
             
         return http.build();
+    }
+
+    // 2. THÊM BỘ CẤU HÌNH MỞ CỬA CHO FRONTEND (CORS)
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        
+        // Cho phép Frontend ở cổng 5173 và 5174 truy cập
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:5174")); 
+        
+        // Cho phép các phương thức HTTP
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        
+        // Cho phép gửi tất cả các Headers (bao gồm cả thẻ Authorization chứa JWT)
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        
+        // Bắt buộc phải có dòng này để Frontend có thể đính kèm thẻ Token vào request
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        // Áp dụng luật mở cửa này cho toàn bộ đường dẫn API
+        source.registerCorsConfiguration("/**", configuration); 
+        return source;
     }
 }

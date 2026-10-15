@@ -49,4 +49,17 @@ public class BookingController {
         List<com.booking.football_pitch.dto.response.BookedSlotResponse> response = bookingService.getBookedSlots(pitchId, date);
         return ResponseEntity.ok(response);
     }
+    // Lấy toàn bộ danh sách đặt sân (Dành cho Admin)
+    @GetMapping("/all")
+    public ResponseEntity<List<BookingResponse>> getAllBookings() {
+        // Lưu ý: Bạn cần tạo thêm hàm getAllBookings() trong BookingService và BookingServiceImpl nhé
+        return ResponseEntity.ok(bookingService.getAllBookings());
+    }
+    // Admin duyệt/hủy đơn hàng
+    @PutMapping("/{bookingId}/status")
+    public ResponseEntity<BookingResponse> updateBookingStatus(
+            @PathVariable Long bookingId,
+            @RequestParam String status) {
+        return ResponseEntity.ok(bookingService.updateBookingStatus(bookingId, status));
+    }
 }

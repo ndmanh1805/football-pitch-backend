@@ -172,4 +172,49 @@ public class BookingServiceImpl implements BookingService {
                 .endTime(b.getEndTime())
                 .build()).collect(java.util.stream.Collectors.toList());
     }
+    @Override
+    public List<BookingResponse> getAllBookings() {
+        // Lấy tất cả các bản ghi đặt sân từ Database
+        List<Booking> allBookings = bookingRepository.findAll();
+
+        // Chuyển đổi từ dạng Entity (Database) sang dạng DTO (Trả về cho Frontend)
+        return allBookings.stream().map(booking -> BookingResponse.builder()
+                .id(booking.getId())
+                // Lấy tên khách hàng từ Entity User (Giả định Entity User có hàm getFullName)
+                .customerName(booking.getUser().getFullName()) 
+                // Lấy tên sân từ Entity Pitch (Giả định Entity Pitch có hàm getName)
+                .pitchName(booking.getPitch().getName()) 
+                .bookingDate(booking.getBookingDate())
+                .startTime(booking.getStartTime())
+                .endTime(booking.getEndTime())
+                // Lấy tổng tiền (theo gợi ý của IDE là getTotalAmount)
+                .totalPrice(booking.getTotalAmount()) 
+                .status(booking.getStatus().name())
+                .build()
+        ).collect(Collectors.toList());
+    }
+    @Override
+    public BookingResponse updateBookingStatus(Long bookingId, String status) {
+        // 1. Tìm đơn hàng trong database
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn đặt sân: " + bookingId));
+
+        // 2. Cập nhật trạng thái mới (Sử dụng Booking.Status)
+        booking.setStatus(Booking.Status.valueOf(status)); 
+        
+        // 3. Lưu lại vào Database
+        bookingRepository.save(booking);
+
+        // 4. Trả về kết quả cho Frontend hiển thị
+        return BookingResponse.builder()
+                .id(booking.getId())
+                .customerName(booking.getUser().getFullName()) 
+                .pitchName(booking.getPitch().getName())
+                .bookingDate(booking.getBookingDate())
+                .startTime(booking.getStartTime())
+                .endTime(booking.getEndTime())
+                .totalPrice(booking.getTotalAmount())
+                .status(booking.getStatus().name())
+                .build();
+    }
 }
